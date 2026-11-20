@@ -121,10 +121,26 @@ Code: `ProductRequest::rules()` and `app/Services/ProductImageStorage.php`. Test
 | Clickjacking | `X-Frame-Options: DENY` and CSP `frame-ancestors 'none'` | `app/Http/Middleware/SetSecurityHeaders.php` | `HttpSecurityTest::test_security_headers_are_sent` |
 | Content Security Policy | Scripts only from this site, no inline scripts. Not sent while `npm run dev` runs | `SetSecurityHeaders` | same |
 | MIME sniffing | `X-Content-Type-Options: nosniff` | `SetSecurityHeaders` | same |
-| HSTS | Sent in production over HTTPS | `SetSecurityHeaders` | — |
+| HSTS | Sent in production over HTTPS only | `SetSecurityHeaders` | `ProductionHardeningTest::test_hsts_is_sent_over_https_in_production` |
+| Cross-window isolation | `Cross-Origin-Opener-Policy: same-origin` | `SetSecurityHeaders` | — |
 | Cookies | Session cookie is `HttpOnly` and `SameSite=Lax`; set `SESSION_SECURE_COOKIE=true` in production | `config/session.php` | `HttpSecurityTest::test_session_cookie_is_http_only` |
-| Host header | Only hosts in `APP_TRUSTED_HOSTS` are accepted outside local development | `bootstrap/app.php`, `config/app.php` | — |
+| Host header | Only hosts in `APP_TRUSTED_HOSTS` are accepted outside local development. Each name is escaped and anchored (`^name$`) because Symfony treats entries as regular expressions: without this, `shop.test` would also match `shop.test.evil.net` | `bootstrap/app.php`, `config/app.php` | `test_only_exact_trusted_host_names_are_accepted` |
 | HTTPS links | `URL::forceScheme('https')` in production | `AppServiceProvider` | — |
+| CORS | No API routes and no CORS config, so browsers on other sites cannot read responses | (framework default) | `test_cross_origin_requests_get_no_cors_permission` |
+| Error details hidden | With `APP_DEBUG=false`, errors show a generic page (`resources/views/errors/*`) or `{"message":"Server Error"}`. Details only go to the log. Error pages load no assets or data, so they render even when the app is broken | `resources/views/errors/` | `test_errors_do_not_reveal_details_when_debug_is_off`, `test_json_errors_do_not_reveal_details_when_debug_is_off` |
+| Report rate limit | 60 report requests per minute per user | `routes/web.php` | — |
+
+## Development safety nets
+
+- `Model::preventLazyLoading()` makes N+1 query mistakes throw during development and tests.
+- `Model::preventSilentlyDiscardingAttributes()` makes passing a non-fillable attribute (for example
+  `quantity`) throw instead of quietly ignoring it. Test: `test_unfillable_attributes_are_not_silently_discarded_in_development`.
+- Both are off in production, where a forgotten eager load should slow a page down, not break it.
+
+## Dependencies
+
+`composer audit` and `npm audit` reported no known vulnerabilities on 2026-11-20. Run both before each
+release, along with `composer outdated` and `npm outdated`.
 
 ## Activity logging and secrets
 

@@ -30,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
         // throws an exception, so N+1 query problems show up during development and tests.
         Model::preventLazyLoading(! $this->app->isProduction());
 
+        // Outside production, passing an attribute that is not fillable throws instead of
+        // being dropped silently, so a forgotten $fillable entry is noticed straight away.
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
         Paginator::useBootstrapFive();
 
         // Polymorphic columns (activity_logs.subject_type) store these short names

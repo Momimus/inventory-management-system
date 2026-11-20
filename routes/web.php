@@ -53,7 +53,8 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
 
     Route::get('low-stock', LowStockController::class)->name('low-stock');
 
-    Route::middleware('can:view-reports')->prefix('reports')->name('reports.')->group(function () {
+    // CSV exports can scan large tables, so report requests are limited per user.
+    Route::middleware(['can:view-reports', 'throttle:60,1'])->prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
         Route::get('movements/{type}', [ReportController::class, 'movements'])->name('movements');

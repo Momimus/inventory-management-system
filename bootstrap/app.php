@@ -15,7 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Rejects requests whose Host header is not listed in APP_TRUSTED_HOSTS
         // (Laravel skips this check in the local environment and in tests).
-        $middleware->trustHosts(at: fn () => config('app.trusted_hosts'), subdomains: false);
+        // Symfony treats each entry as a regular expression, so host names are
+        // escaped and anchored: "shop.test" must not also match "shop.test.evil.net".
+        $middleware->trustHosts(
+            at: fn () => array_map(
+                fn (string $host) => '^'.preg_quote($host).'$',
+                config('app.trusted_hosts'),
+            ),
+            subdomains: false,
+        );
 
         $middleware->web(append: [
             SetSecurityHeaders::class,

@@ -26,6 +26,7 @@ class SetSecurityHeaders
         $headers->set('X-Frame-Options', 'DENY');
         $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        $headers->set('Cross-Origin-Opener-Policy', 'same-origin');
 
         // The Vite dev server serves assets from another port, which this policy would block.
         if (! Vite::isRunningHot()) {
