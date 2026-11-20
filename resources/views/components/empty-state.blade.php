@@ -1,12 +1,12 @@
 @props(['icon' => 'inbox', 'title', 'message' => null])
 
-<div class="empty-state">
-    <i class="bi bi-{{ $icon }}" aria-hidden="true"></i>
-    <p class="fw-semibold text-body mt-2 mb-1">{{ $title }}</p>
+<div {{ $attributes->class('empty-state') }}>
+    <span class="empty-state-icon" aria-hidden="true"><i class="bi bi-{{ $icon }}"></i></span>
+    <p class="empty-state-title">{{ $title }}</p>
     @if ($message)
-        <p class="small mb-0">{{ $message }}</p>
+        <p class="empty-state-message">{{ $message }}</p>
     @endif
     @if ($slot->isNotEmpty())
-        <div class="mt-3">{{ $slot }}</div>
+        <div class="empty-state-actions">{{ $slot }}</div>
     @endif
 </div>

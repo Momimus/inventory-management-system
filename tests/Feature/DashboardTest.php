@@ -50,6 +50,10 @@ class DashboardTest extends TestCase
         $this->assertSame(1, $summary['out_of_stock'], 'Inactive products do not raise alerts.');
         $this->assertSame('Tools', $summary['by_category'][0]['name']);
         $this->assertSame(13, $summary['by_category'][0]['units']);
+        $this->assertSame(1, $summary['in_stock'], 'Healthy stock counts active products above their reorder level.');
+        $this->assertSame('Tools', $summary['value_by_category'][0]['name']);
+        $this->assertEqualsWithDelta(56.0, $summary['value_by_category'][0]['value'], 0.001);
+        $this->assertEqualsWithDelta(0.0, $summary['value_by_category'][1]['value'], 0.001);
 
         $this->assertCount(2, $response->viewData('alerts'));
     }

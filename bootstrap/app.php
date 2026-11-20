@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             subdomains: false,
         );
 
+        // A display preference written by resources/js/app.js. It is only ever
+        // compared with the literal "collapsed", so it does not need encrypting.
+        $middleware->encryptCookies(except: ['ims_sidebar']);
+
         $middleware->web(append: [
             SetSecurityHeaders::class,
             EnsureUserIsActive::class,

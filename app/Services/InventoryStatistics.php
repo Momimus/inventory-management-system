@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\StockLevel;
 use App\Enums\StockTransactionType;
 use App\Models\Category;
 use App\Models\Product;
@@ -20,7 +21,8 @@ use Illuminate\Support\Facades\DB;
  */
 class InventoryStatistics
 {
-    public const CACHE_KEY = 'inventory.statistics';
+    // Versioned so that after a deploy changes the cached shape, an older array is never read.
+    public const CACHE_KEY = 'inventory.statistics.v2';
 
     public const MOVEMENT_DAYS = 7;
 
@@ -34,9 +36,11 @@ class InventoryStatistics
             'units' => (int) Product::sum('quantity'),
             'stock_value_cost' => (float) Product::sum(DB::raw('quantity * purchase_price')),
             'stock_value_retail' => (float) Product::sum(DB::raw('quantity * selling_price')),
+            'in_stock' => Product::active()->atStockLevel(StockLevel::InStock)->count(),
             'low_stock' => Product::active()->lowStock()->where('quantity', '>', 0)->count(),
             'out_of_stock' => Product::active()->outOfStock()->count(),
             'by_category' => $this->unitsByCategory(),
+            'value_by_category' => $this->valueByCategory(),
             'movements' => $this->dailyMovements(),
         ]);
     }
@@ -69,6 +73,25 @@ class InventoryStatistics
                 'products' => $category->products_count,
                 'units' => (int) $category->products_sum_quantity,
             ])
+            ->all();
+    }
+
+    /**
+     * Stock value at purchase price per category, highest first.
+     *
+     * @return list<array{name: string, value: float}>
+     */
+    private function valueByCategory(): array
+    {
+        return DB::table('categories')
+            ->join('products', 'products.category_id', '=', 'categories.id')
+            ->groupBy('categories.id', 'categories.name')
+            ->select('categories.name')
+            ->selectRaw('sum(products.quantity * products.purchase_price) as stock_value')
+            ->orderByDesc('stock_value')
+            ->limit(6)
+            ->get()
+            ->map(fn ($row) => ['name' => $row->name, 'value' => (float) $row->stock_value])
             ->all();
     }
 
