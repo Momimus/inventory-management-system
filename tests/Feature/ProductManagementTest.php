@@ -230,6 +230,23 @@ class ProductManagementTest extends TestCase
         $this->assertModelExists($product);
     }
 
+    public function test_delete_action_is_not_offered_for_products_with_stock_history(): void
+    {
+        $product = Product::factory()->create(['quantity' => 5]);
+        StockTransaction::forceCreate([
+            'product_id' => $product->id,
+            'type' => 'in',
+            'quantity' => 5,
+            'balance_after' => 5,
+        ]);
+
+        $this->actingAs($this->admin)->get("/products/{$product->id}")
+            ->assertOk()
+            ->assertSee('Product deletion unavailable')
+            ->assertSee('This product has stock history and cannot be deleted. Mark it inactive instead.')
+            ->assertDontSee('Delete product');
+    }
+
     public function test_product_text_is_escaped(): void
     {
         $product = Product::factory()->create([

@@ -50,16 +50,24 @@
 
             @can('delete', $product)
                 <div class="card border-danger-subtle">
-                    <div class="card-header text-danger">Delete product</div>
+                    <div class="card-header text-danger">
+                        {{ $recentTransactions->isEmpty() ? 'Delete product' : 'Product deletion unavailable' }}
+                    </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('products.destroy', $product) }}"
-                              data-confirm="Delete {{ $product->name }}? This cannot be undone." data-confirm-button="Delete">
-                            @csrf
-                            @method('DELETE')
-                            <p class="small text-body-secondary">Only products without stock history can be deleted.
-                                Otherwise mark the product inactive.</p>
-                            <button type="submit" class="btn btn-outline-danger">Delete product</button>
-                        </form>
+                        @if ($recentTransactions->isEmpty())
+                            <form method="POST" action="{{ route('products.destroy', $product) }}"
+                                  data-confirm="Delete {{ $product->name }}? This cannot be undone." data-confirm-button="Delete">
+                                @csrf
+                                @method('DELETE')
+                                <p class="small text-body-secondary">Only products without stock history can be deleted.
+                                    Otherwise mark the product inactive.</p>
+                                <button type="submit" class="btn btn-outline-danger">Delete product</button>
+                            </form>
+                        @else
+                            <p class="small text-body-secondary mb-0">
+                                This product has stock history and cannot be deleted. Mark it inactive instead.
+                            </p>
+                        @endif
                     </div>
                 </div>
             @endcan
