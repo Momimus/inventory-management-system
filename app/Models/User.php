@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Models\Concerns\Searchable;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,7 +13,14 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Searchable;
+
+    /**
+     * Columns matched by the search() scope.
+     *
+     * @var list<string>
+     */
+    protected array $searchable = ['name', 'email'];
 
     /**
      * Role and active status are deliberately not fillable: they are only
@@ -64,12 +71,5 @@ class User extends Authenticatable
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);
-    }
-
-    public function scopeSearch(Builder $query, ?string $term): void
-    {
-        $query->when($term, fn (Builder $query) => $query->where(function (Builder $query) use ($term) {
-            $query->whereLike('name', "%{$term}%")->orWhereLike('email', "%{$term}%");
-        }));
     }
 }

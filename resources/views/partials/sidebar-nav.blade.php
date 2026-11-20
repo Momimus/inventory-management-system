@@ -2,6 +2,9 @@
 <nav class="app-sidebar-nav" aria-label="Main navigation">
     <x-sidebar-link route="dashboard" icon="speedometer2">Dashboard</x-sidebar-link>
 
+    <div class="app-sidebar-heading">Catalogue</div>
+    <x-sidebar-link route="categories.index" active="categories.*" icon="tags">Categories</x-sidebar-link>
+
     @can('viewAny', \App\Models\User::class)
         <div class="app-sidebar-heading">Administration</div>
         <x-sidebar-link route="users.index" active="users.*" icon="people">Users</x-sidebar-link>
