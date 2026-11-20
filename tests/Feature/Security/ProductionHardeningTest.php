@@ -102,6 +102,24 @@ class ProductionHardeningTest extends TestCase
         new Product(['name' => 'Test', 'quantity' => 999]);
     }
 
+    public function test_every_application_route_requires_authentication(): void
+    {
+        $public = ['login', 'forgot-password', 'reset-password', 'reset-password/{token}', 'up'];
+
+        foreach (Route::getRoutes() as $route) {
+            if (in_array($route->uri(), $public, true) || str_starts_with($route->uri(), '_test/')) {
+                continue;
+            }
+
+            $this->assertContains('auth', $route->gatherMiddleware(), "Route {$route->uri()} must require authentication.");
+        }
+    }
+
+    public function test_private_storage_is_not_served_over_http(): void
+    {
+        $this->assertFalse(Route::has('storage.local'));
+    }
+
     public function test_hidden_user_attributes_are_never_serialised(): void
     {
         $user = User::factory()->make();
