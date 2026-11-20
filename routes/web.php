@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LowStockController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockTransactionController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -50,6 +51,14 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
     Route::get('stock/transactions/{transaction}', [StockTransactionController::class, 'show'])->name('stock.show');
 
     Route::get('low-stock', LowStockController::class)->name('low-stock');
+
+    Route::middleware('can:view-reports')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
+        Route::get('movements/{type}', [ReportController::class, 'movements'])->name('movements');
+        Route::get('low-stock', [ReportController::class, 'lowStock'])->name('low-stock');
+        Route::get('product-history', [ReportController::class, 'productHistory'])->name('product-history');
+    });
 
     Route::resource('users', UserController::class)->except(['show', 'destroy']);
     Route::patch('users/{user}/status', [UserController::class, 'toggleStatus'])->name('users.status');

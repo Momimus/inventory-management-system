@@ -30,6 +30,11 @@
     <x-sidebar-link route="categories.index" active="categories.*" icon="tags">Categories</x-sidebar-link>
     <x-sidebar-link route="suppliers.index" active="suppliers.*" icon="truck">Suppliers</x-sidebar-link>
 
+    @can('view-reports')
+        <div class="app-sidebar-heading">Insights</div>
+        <x-sidebar-link route="reports.index" active="reports.*" icon="bar-chart-line">Reports</x-sidebar-link>
+    @endcan
+
     @can('viewAny', \App\Models\User::class)
         <div class="app-sidebar-heading">Administration</div>
         <x-sidebar-link route="users.index" active="users.*" icon="people">Users</x-sidebar-link>

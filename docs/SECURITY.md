@@ -101,6 +101,18 @@ Code: `ProductRequest::rules()` and `app/Services/ProductImageStorage.php`. Test
    are always `.webp`, so the web server never executes them.
 6. **Clean-up.** Replaced or removed images are deleted from disk.
 
+## Reports and CSV export
+
+- **Admin only, checked twice.** Reports require the `view-reports` gate, enforced by the route group
+  (`can:view-reports`) and again by `ReportRequest::authorize()`.
+  Test: `test_staff_cannot_open_or_export_any_report`.
+- **Filters are validated.** Dates must be real dates with `to` ≥ `from`; category, supplier and product IDs
+  must exist; `format` only accepts `csv`.
+- **CSV formula injection is blocked.** `App\Support\CsvExport::cell()` prefixes text starting with `=`,
+  `+`, `-`, `@`, tab or carriage return with `'`, so Excel shows it as text and doesn't run it. Real numbers
+  are left untouched. Tests: `test_csv_cells_that_look_like_formulas_are_neutralised`, `test_csv_cell_escaping_rules`.
+- **Exports are audited.** Every export writes a `report.exported` activity-log entry with the filters used.
+
 ## HTTP and browser protections
 
 | Protection | How | Code | Test |
