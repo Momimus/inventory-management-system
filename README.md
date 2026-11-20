@@ -1,59 +1,67 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventory Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web application for running a small business's stock room. It tracks products, categories and
+suppliers, records stock in, stock out and adjustments, warns about low stock and produces reports.
+Built with Laravel 12, MySQL/MariaDB and Bootstrap 5.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Sign-in and roles.** Administrator and Staff roles, login rate limiting, password reset by email,
+  and deactivation instead of deletion.
+- **Catalogue.** Products (unique SKU, purchase and selling price, reorder level, image, active flag),
+  categories (with safe deletion and product reassignment) and suppliers.
+- **Stock movements.** Stock In, Stock Out and admin-only Adjustments. The product row is locked during
+  each movement, negative stock is refused, and every change is kept in a permanent history.
+- **Low-stock alerts.** Calculated live from quantities, shown on the dashboard, in a sidebar badge and
+  on a dedicated page.
+- **Dashboard.** Totals, stock value, units by category, the last 7 days of movements, recent
+  transactions and recent activity.
+- **Reports.** Current inventory, stock in, stock out, adjustments, low stock and product history,
+  with date, category, supplier and product filters and CSV export.
+- **Activity log.** A permanent record of sign-ins, catalogue changes, stock movements, user management
+  and exports.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick start (Windows + XAMPP)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+# create the database "inventory_management" (utf8mb4) in MySQL first
+php artisan migrate
+php artisan storage:link
+php artisan db:seed           # optional demo data
+npm run build
+php artisan serve             # http://127.0.0.1:8000
+```
 
-## Learning Laravel
+Demo accounts (local only): `admin@example.com` / `staff@example.com`, password `Password123`.
+On a real installation, create the first account with `php artisan users:create-admin`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Full instructions are in [docs/ENVIRONMENT_SETUP.md](docs/ENVIRONMENT_SETUP.md).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Checks
 
-## Laravel Sponsors
+```bash
+php artisan test            # 170 tests
+./vendor/bin/pint --test    # code style (PSR-12 based)
+npm run build               # front-end assets
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Documentation
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Document | Contents |
+|---|---|
+| [ENVIRONMENT_SETUP](docs/ENVIRONMENT_SETUP.md) | Installing and configuring the development environment |
+| [TECH_STACK](docs/TECH_STACK.md) | Technologies used and why |
+| [PROJECT_ARCHITECTURE](docs/PROJECT_ARCHITECTURE.md) | Folder structure, request flow, modules and permissions |
+| [DATABASE_DESIGN](docs/DATABASE_DESIGN.md) | Tables, relationships, indexes and deletion rules |
+| [SECURITY](docs/SECURITY.md) | Each protection, where it is implemented and which test proves it |
+| [TESTING](docs/TESTING.md) | What is tested and how to run the tests |
+| [DEPLOYMENT](docs/DEPLOYMENT.md) | Production setup, hardening, backups and updates |
+| [LEARNING_GUIDE](docs/LEARNING_GUIDE.md) | The Laravel concepts used, explained with this project's code |
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT. See [LICENSE](LICENSE).

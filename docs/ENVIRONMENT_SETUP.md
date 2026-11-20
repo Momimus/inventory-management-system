@@ -1,58 +1,46 @@
 # Environment Setup
 
-How this project was set up on Windows with XAMPP, and how to set it up again on a new machine.
+How to set up the project for development on Windows with XAMPP. The steps are the same on macOS or
+Linux; only the paths differ.
 
 ## Requirements
 
-| Tool     | Version used        | Minimum for this project |
-|----------|---------------------|--------------------------|
-| PHP      | 8.2.12 (XAMPP)      | 8.2                      |
-| Composer | 2.8.9               | 2.x                      |
-| MariaDB  | 10.4.32 (XAMPP)     | 10.3 / MySQL 5.7         |
-| Node.js  | 22.13.1             | 20.19                    |
-| npm      | 11.3.0              | 10                       |
+| Tool | Version used | Minimum |
+|---|---|---|
+| PHP | 8.2.12 (XAMPP) | 8.2, with `gd`, `intl`, `zip`, `pdo_mysql`, `mbstring`, `openssl`, `fileinfo` |
+| Composer | 2.8.9 | 2.x |
+| MariaDB | 10.4.32 (XAMPP) | MariaDB 10.3 / MySQL 5.7 |
+| Node.js | 22.13.1 | 20.19 |
+| npm | 11.3.0 | 10 |
 
-Laravel 13 needs PHP 8.3, so Composer installed **Laravel 12**. Upgrade XAMPP's PHP first if you want Laravel 13.
+Laravel 13 needs PHP 8.3, so this project uses **Laravel 12**.
 
 ## 1. Make PHP and MySQL available in the terminal
 
-XAMPP ships PHP and MariaDB, but does not add them to `PATH`. Add these two folders to your **user** `PATH`
-(Windows Settings → "Edit environment variables for your account"):
+Add these folders to your **user** `PATH` (Windows Settings → "Edit environment variables for your account"):
 
 ```
 C:\xampp\php
 C:\xampp\mysql\bin
 ```
 
-Open a new terminal and check:
+Open a **new** terminal and check: `php -v`, `composer --version`, `mysql --version`, `node -v`.
 
-```bash
-php -v
-composer --version
-mysql --version
-node -v
-npm -v
-```
+## 2. Enable PHP extensions
 
-## 2. Enable the required PHP extensions
-
-Open `C:\xampp\php\php.ini` and remove the leading `;` from these lines:
+In `C:\xampp\php\php.ini`, remove the leading `;` from:
 
 ```ini
-extension=gd
-extension=intl
-extension=zip
+extension=gd     ; resizes and re-encodes product images
+extension=intl   ; currency and number formatting
+extension=zip    ; lets Composer unpack packages quickly
 ```
 
-`gd` resizes and re-encodes uploaded product images. `zip` lets Composer unpack packages quickly.
-`intl` is used by Laravel's number and currency helpers.
-Run `php -m` to confirm they are loaded.
+Run `php -m` to confirm `gd`, `intl` and `zip` are listed.
 
-## 3. Start MySQL
+## 3. Start MySQL and create the database
 
-Start **MySQL** from the XAMPP Control Panel. The XAMPP default login is user `root` with an empty password.
-
-Create the database:
+Start **MySQL** in the XAMPP Control Panel (default login: `root`, empty password), then:
 
 ```bash
 mysql -u root -e "CREATE DATABASE inventory_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -60,61 +48,73 @@ mysql -u root -e "CREATE DATABASE inventory_management CHARACTER SET utf8mb4 COL
 
 ## 4. Install the project
 
-From the project folder:
-
 ```bash
 composer install
 npm install
-cp .env.example .env      # skip if .env already exists
+cp .env.example .env          # skip if .env exists
 php artisan key:generate
 php artisan migrate
-php artisan users:create-admin   # your first login
-npm run build
+php artisan storage:link      # makes uploaded product images reachable at /storage/...
 ```
 
-There is no public registration page. Further accounts are created by an administrator.
+Then either load demo data or create your own administrator:
 
-## 5. Database settings in `.env`
+```bash
+php artisan db:seed               # demo shop: admin@example.com / staff@example.com, password Password123
+php artisan users:create-admin    # or: create a real admin account interactively
+```
+
+There is no public registration page. Other accounts are created by an administrator under **Users**.
+
+## 5. Settings in `.env`
 
 ```dotenv
+APP_NAME="Inventory Management"
+APP_URL=http://127.0.0.1:8000
+INVENTORY_CURRENCY=USD        # any ISO 4217 code, used to display prices
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=inventory_management
 DB_USERNAME=root
 DB_PASSWORD=
+
+MAIL_MAILER=log               # password-reset emails are written to storage/logs/laravel.log
 ```
 
-After changing `.env`, run `php artisan config:clear`.
+Run `php artisan config:clear` after changing `.env`.
 
 ## 6. Run the application
 
-Use two terminals:
-
 ```bash
-php artisan serve     # http://127.0.0.1:8000
-npm run dev           # Vite: reloads CSS/JS while you edit
+php artisan serve     # terminal 1: http://127.0.0.1:8000
+npm run dev           # terminal 2: rebuilds CSS/JS as you edit (optional)
 ```
 
-If you only run `php artisan serve`, run `npm run build` first so the compiled assets exist in `public/build`.
+Without `npm run dev`, run `npm run build` once so that `public/build` exists.
 
-## Useful checks
+## 7. Run the checks
 
 ```bash
-php artisan migrate:status     # which migrations have run
-php artisan route:list         # all registered routes
-php artisan test               # run the test suite
-./vendor/bin/pint --test       # code style check (PSR-12 based)
+php artisan test
+./vendor/bin/pint --test
+npm run build
 ```
+
+See [TESTING.md](TESTING.md) for running the tests against MySQL as well.
 
 ## Troubleshooting
 
 | Problem | Fix |
-|---------|-----|
-| `php: command not found` | PATH is missing `C:\xampp\php`, or the terminal was opened before PATH was changed. |
-| `SQLSTATE[HY000] [2002]` connection refused | MySQL is not running. Start it in XAMPP. |
-| `Unknown database 'inventory_management'` | Run the `CREATE DATABASE` command in step 3. |
-| `php artisan db:show` fails with `performance_schema.session_status` | Known MariaDB 10.4 limitation. The connection is fine; use `php artisan migrate:status` instead. |
-| Composer `curl error 28` timeouts | Slow network or IPv6 DNS. Retry with `COMPOSER_IPRESOLVE=4 composer install`. |
-| `Vite manifest not found` | Run `npm run build` or keep `npm run dev` running. |
-| `composer run dev` fails on `pail` | `laravel/pail` needs the `pcntl` extension, which Windows lacks. Run `php artisan serve` and `npm run dev` separately. |
+|---|---|
+| `php: command not found` | PATH is missing `C:\xampp\php`, or the terminal was opened before PATH changed |
+| `SQLSTATE[HY000] [2002]` | MySQL is not running; start it in XAMPP |
+| `Unknown database` | Run the `CREATE DATABASE` command in step 3 |
+| Product images show as broken | Run `php artisan storage:link` |
+| "The image could not be read" or a GD error | `extension=gd` is not enabled (step 2) |
+| `Vite manifest not found` | Run `npm run build`, or keep `npm run dev` running |
+| `php artisan db:show` fails with `performance_schema` | Known MariaDB 10.4 limitation; the connection is fine. Use `php artisan migrate:status` |
+| Composer `curl error 28` timeouts | Slow network or IPv6 DNS: `COMPOSER_IPRESOLVE=4 composer install` |
+| `composer run dev` fails on `pail` | `laravel/pail` needs `pcntl`, which Windows lacks. Run `php artisan serve` and `npm run dev` separately |
+| Password-reset email never arrives | With `MAIL_MAILER=log` it is in `storage/logs/laravel.log`. Configure SMTP for real email |

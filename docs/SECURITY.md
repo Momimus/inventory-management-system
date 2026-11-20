@@ -150,3 +150,25 @@ by `app/Listeners/RecordAuthenticationActivity.php`.
 `ActivityLogger` removes `password`, `password_confirmation`, `current_password`, `remember_token` and
 `token` from logged data at any depth. A failed login records only the email that was tried.
 Tests: `test_failed_login_is_logged_without_the_password`, `test_password_change_logs_never_contain_the_password`.
+
+## Database security
+
+- **Credentials live only in `.env`**, which is git-ignored. `.env.example` contains no secrets.
+- **Least privilege.** Production uses a database account limited to `SELECT, INSERT, UPDATE, DELETE`.
+  A separate account runs migrations ([DEPLOYMENT.md](DEPLOYMENT.md#2-database-with-least-privilege)).
+- **The schema enforces integrity too.** Foreign keys with `RESTRICT`, a unique SKU, an `UNSIGNED`
+  quantity and exact `DECIMAL(10,2)` prices.
+- **Backups and restore** are covered in [DEPLOYMENT.md](DEPLOYMENT.md#7-backups-and-recovery).
+
+## Not covered (known limitations)
+
+These are not implemented. Consider them for a larger deployment:
+
+- **Two-factor authentication.**
+- **Email verification.** Accounts are created by an administrator, so addresses are trusted.
+- **Malware scanning of uploads.** Re-encoding removes payloads from images, but no antivirus runs.
+- **Audit-log retention.** `activity_logs` grows forever; archive old rows if it gets large.
+- **Fine-grained permissions.** There are two fixed roles. Moving to a permissions table would mean
+  changing the gate and policy bodies.
+- **Row locks aren't covered by automated tests.** The default SQLite tests don't exercise them. They
+  were verified manually on MariaDB (see Inventory integrity), and the full suite also passes on MariaDB.

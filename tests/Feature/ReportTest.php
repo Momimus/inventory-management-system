@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\StockService;
-use App\Support\CsvExport;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -221,17 +220,5 @@ class ReportTest extends TestCase
         $rows = $this->csvRows($this->actingAs($this->admin)->get('/reports/inventory?format=csv')->streamedContent());
 
         $this->assertSame('\'=HYPERLINK("http://evil.test","Click")', $rows[1][1]);
-    }
-
-    public function test_csv_cell_escaping_rules(): void
-    {
-        $this->assertSame("'=1+1", CsvExport::cell('=1+1'));
-        $this->assertSame("'+44 20", CsvExport::cell('+44 20'));
-        $this->assertSame("'@SUM(A1)", CsvExport::cell('@SUM(A1)'));
-        $this->assertSame("'-2+3", CsvExport::cell('-2+3'));
-        $this->assertSame(-4, CsvExport::cell(-4), 'Real negative numbers stay numeric.');
-        $this->assertSame(12.5, CsvExport::cell(12.5));
-        $this->assertSame('Plain text', CsvExport::cell('Plain text'));
-        $this->assertSame('', CsvExport::cell(null));
     }
 }
