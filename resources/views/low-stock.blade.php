@@ -8,7 +8,7 @@
         <x-filter-select name="supplier" label="Supplier" :options="$suppliers" :value="$filters['supplier'] ?? null" />
     </x-filter-bar>
 
-    <div class="card">
+    <div class="card overflow-hidden">
         @if ($products->isEmpty())
             <x-empty-state icon="check2-circle" title="Nothing needs reordering"
                            message="Every active product matching these filters is above its reorder level." />
