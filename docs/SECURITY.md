@@ -19,6 +19,28 @@ If a protection is not listed here, assume it does not exist yet.
 | No self-registration | Accounts are created by an administrator or with `php artisan users:create-admin` | `routes/web.php` | `AuthenticationTest` |
 | Profile can't escalate privileges | `role` and `is_active` are not mass-assignable; profile routes have no user ID | `User::$fillable`, `ProfileController` | `ProfileTest::test_profile_update_cannot_change_role_or_status` |
 
+## Authorization (roles)
+
+There are two roles, stored in `users.role` and typed by `App\Enums\UserRole`. Permissions are checked
+on the server for every request; hiding a button is only a convenience.
+
+| Where | Used for |
+|---|---|
+| `app/Policies/*Policy.php` | Rules about one kind of record, e.g. `UserPolicy::update()`. Laravel finds the policy for each model by name |
+| `AppServiceProvider::defineGates()` | Abilities not tied to a record: `adjust-stock`, `view-reports`, `view-activity-log` |
+| Form Requests `authorize()` | Store/update requests check the policy before validation runs |
+| `$this->authorize()` in controllers | All other actions |
+| `@can` in Blade | Hides links and buttons the user cannot use |
+
+User management rules (`UserPolicy`):
+
+- Only administrators can list, create or edit users.
+- Administrators cannot change their own role or deactivate themselves, so at least one active admin always remains.
+- Users are never deleted; deactivation keeps their history intact.
+
+Tests: `UserManagementTest`, including `test_staff_cannot_access_any_user_management_route`. That test
+sends staff requests straight to admin URLs with other users' IDs (IDOR attempts) and expects 403.
+
 ## HTTP and browser protections
 
 | Protection | How | Code | Test |

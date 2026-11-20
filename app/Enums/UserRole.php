@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasOptions;
+
 enum UserRole: string
 {
+    use HasOptions;
+
     case Admin = 'admin';
     case Staff = 'staff';
 
