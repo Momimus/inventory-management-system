@@ -4,6 +4,7 @@
 
     <div class="app-sidebar-heading">Catalogue</div>
     <x-sidebar-link route="categories.index" active="categories.*" icon="tags">Categories</x-sidebar-link>
+    <x-sidebar-link route="suppliers.index" active="suppliers.*" icon="truck">Suppliers</x-sidebar-link>
 
     @can('viewAny', \App\Models\User::class)
         <div class="app-sidebar-heading">Administration</div>
