@@ -31,13 +31,16 @@
                         data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open menu">
                     <i class="bi bi-list fs-4" aria-hidden="true"></i>
                 </button>
+                <a href="{{ route('dashboard') }}" class="fw-semibold text-body text-decoration-none d-lg-none text-truncate">
+                    {{ config('app.name') }}
+                </a>
 
                 <div class="dropdown ms-auto">
                     <button class="btn btn-link text-body text-decoration-none dropdown-toggle" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
-                        {{ auth()->user()->name }}
-                        <span class="badge text-bg-light border ms-1">{{ auth()->user()->role->label() }}</span>
+                        <span class="d-none d-sm-inline">{{ auth()->user()->name }}</span>
+                        <span class="badge text-bg-light border ms-1 d-none d-md-inline">{{ auth()->user()->role->label() }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>My profile</a></li>

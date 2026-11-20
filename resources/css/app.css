@@ -42,7 +42,8 @@
     --bs-offcanvas-width: var(--app-sidebar-width);
     --bs-offcanvas-bg: var(--app-sidebar-bg);
     color: var(--app-sidebar-color);
-    background-color: var(--app-sidebar-bg);
+    /* Bootstrap makes .offcanvas-lg transparent with !important on large screens. */
+    background-color: var(--app-sidebar-bg) !important;
 }
 
 @media (min-width: 992px) {
@@ -149,6 +150,10 @@
 }
 
 /* Components */
+
+.min-w-0 {
+    min-width: 0;
+}
 
 .card {
     border-color: #e3e7ee;
