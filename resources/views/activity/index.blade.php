@@ -14,7 +14,7 @@
         </div>
     </x-filter-bar>
 
-    <div class="card">
+    <div class="card overflow-hidden">
         @if ($entries->isEmpty())
             <x-empty-state icon="activity" title="No activity matches these filters" />
         @else
