@@ -60,6 +60,30 @@ sends staff requests straight to admin URLs with other users' IDs (IDOR attempts
 - **Quantity can't be mass-assigned.** `quantity` is not in `Product::$fillable`, so a forged form field cannot
   change stock. Test: `test_quantity_cannot_be_set_through_the_product_form`.
 
+## Inventory integrity
+
+All quantity changes go through `app/Services/StockService.php`. Nothing else writes `products.quantity`.
+
+| Rule | How | Test |
+|---|---|---|
+| No negative stock | Stock-out is refused when it asks for more than is on hand. `products.quantity` is also `UNSIGNED`, so the database rejects negatives too | `test_stock_out_cannot_make_stock_negative` |
+| Quantity and history saved together | `DB::transaction()` wraps the quantity update, the transaction row and the activity-log row | `test_quantity_update_is_rolled_back_when_recording_the_transaction_fails` |
+| No race conditions | The product row is locked with `lockForUpdate()` before it is read. The new quantity is calculated from that locked row, never from a form or an old model | `test_quantities_are_read_from_the_database_not_from_a_stale_model`, plus the MySQL experiment below |
+| Product edits don't overwrite stock | Eloquent only saves changed columns, and `quantity` is not fillable | `test_product_edits_do_not_overwrite_stock_changed_in_the_meantime` |
+| History is permanent | No edit or delete routes. `StockTransactionPolicy::update/delete` return `false`. The `IsAppendOnly` trait makes the model throw on update or delete. The same applies to activity logs | `test_transactions_cannot_be_modified_or_deleted`, `test_there_is_no_way_to_edit_or_delete_a_transaction_over_http` |
+| Recorder can't be faked | `user_id` comes from the signed-in user, never from the form | `test_the_recording_user_cannot_be_spoofed` |
+| Adjustments are restricted | Admin only (`adjust-stock` gate), and a reason is required | `test_staff_cannot_make_adjustments`, `test_admin_adjustment_requires_a_reason` |
+| Deadlocks retried | `DB::transaction(..., attempts: 3)` retries on deadlock | — |
+
+**Concurrency experiment (MariaDB 10.4).** Automated tests use SQLite, which ignores row locks. So the
+locking was checked on MariaDB: 8 PHP processes, started at the same instant, each tried 10 one-unit
+stock-outs on a product with 50 in stock. All 80 attempts landed within the same second.
+
+| Version | Result |
+|---|---|
+| `StockService` (transaction + lock) | 50 succeeded, 30 refused, final quantity **0**, 50 distinct `balance_after` values (49 → 0) |
+| Naive read-modify-write (no lock) | Workers believed they sold **80**; the database showed **12** left |
+
 ## File uploads (product images)
 
 Code: `ProductRequest::rules()` and `app/Services/ProductImageStorage.php`. Tests: `ProductImageUploadTest`.

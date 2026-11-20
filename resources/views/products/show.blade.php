@@ -26,7 +26,25 @@
                         <span class="fs-3 fw-semibold">{{ number_format($product->quantity) }}</span>
                         <x-stock-badge :product="$product" />
                     </div>
-                    <div class="small text-body-secondary">Reorder level: {{ number_format($product->reorder_level) }}</div>
+                    <div class="small text-body-secondary mb-3">Reorder level: {{ number_format($product->reorder_level) }}</div>
+
+                    @if ($product->is_active)
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ route('stock.create', ['type' => 'in', 'product' => $product->id]) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-box-arrow-in-down me-1"></i>Stock in
+                            </a>
+                            <a href="{{ route('stock.create', ['type' => 'out', 'product' => $product->id]) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-box-arrow-up me-1"></i>Stock out
+                            </a>
+                            @can('create', [\App\Models\StockTransaction::class, \App\Enums\StockTransactionType::Adjustment])
+                                <a href="{{ route('stock.create', ['type' => 'adjustment', 'product' => $product->id]) }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-sliders me-1"></i>Adjust
+                                </a>
+                            @endcan
+                        </div>
+                    @else
+                        <p class="small text-body-secondary mb-0">Inactive products cannot receive stock movements.</p>
+                    @endif
                 </div>
             </div>
 
@@ -86,6 +104,20 @@
                         <dd class="col-sm-8 mb-0">{{ $product->updated_at->format('d M Y, H:i') }}</dd>
                     </dl>
                 </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Recent stock movements</span>
+                    @if ($recentTransactions->isNotEmpty())
+                        <a href="{{ route('stock.index', ['product' => $product->id]) }}" class="small fw-normal">Full history</a>
+                    @endif
+                </div>
+                @if ($recentTransactions->isEmpty())
+                    <x-empty-state icon="clock-history" title="No stock movements yet" />
+                @else
+                    @include('stock._table', ['transactions' => $recentTransactions, 'showProduct' => false])
+                @endif
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StockTransactionController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,13 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('suppliers', SupplierController::class);
     Route::resource('products', ProductController::class);
+
+    // {type} is bound to the StockTransactionType enum, so unknown types return 404.
+    // There are deliberately no edit, update or delete routes for transactions.
+    Route::get('stock', [StockTransactionController::class, 'index'])->name('stock.index');
+    Route::get('stock/{type}/create', [StockTransactionController::class, 'create'])->name('stock.create');
+    Route::post('stock/{type}', [StockTransactionController::class, 'store'])->name('stock.store');
+    Route::get('stock/transactions/{transaction}', [StockTransactionController::class, 'show'])->name('stock.show');
 
     Route::resource('users', UserController::class)->except(['show', 'destroy']);
     Route::patch('users/{user}/status', [UserController::class, 'toggleStatus'])->name('users.status');

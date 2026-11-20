@@ -92,7 +92,14 @@ class ProductController extends Controller
 
         $product->load(['category', 'supplier']);
 
-        return view('products.show', ['product' => $product]);
+        $recentTransactions = $product->stockTransactions()
+            ->with(['product', 'user', 'supplier'])
+            ->latest()
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
+        return view('products.show', ['product' => $product, 'recentTransactions' => $recentTransactions]);
     }
 
     public function edit(Product $product): View
