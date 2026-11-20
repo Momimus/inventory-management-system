@@ -17,6 +17,13 @@
         </a>
     @endcan
     <x-sidebar-link route="stock.index" active="stock.index|stock.show" icon="clock-history">Transactions</x-sidebar-link>
+    <a href="{{ route('low-stock') }}" @class(['app-sidebar-link', 'active' => request()->routeIs('low-stock')])>
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <span>Low stock</span>
+        @if ($stockAlertCount > 0)
+            <span class="badge rounded-pill text-bg-warning ms-auto" aria-label="{{ $stockAlertCount }} products need attention">{{ $stockAlertCount }}</span>
+        @endif
+    </a>
 
     <div class="app-sidebar-heading">Catalogue</div>
     <x-sidebar-link route="products.index" active="products.*" icon="box-seam">Products</x-sidebar-link>

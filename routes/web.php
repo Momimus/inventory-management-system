@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LowStockController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockTransactionController;
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
     Route::get('stock/{type}/create', [StockTransactionController::class, 'create'])->name('stock.create');
     Route::post('stock/{type}', [StockTransactionController::class, 'store'])->name('stock.store');
     Route::get('stock/transactions/{transaction}', [StockTransactionController::class, 'show'])->name('stock.show');
+
+    Route::get('low-stock', LowStockController::class)->name('low-stock');
 
     Route::resource('users', UserController::class)->except(['show', 'destroy']);
     Route::patch('users/{user}/status', [UserController::class, 'toggleStatus'])->name('users.status');

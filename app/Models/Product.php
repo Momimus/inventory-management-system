@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StockLevel;
+use App\Models\Concerns\FlushesInventoryStatistics;
 use App\Models\Concerns\Searchable;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
-    use HasFactory, Searchable;
+    use FlushesInventoryStatistics, HasFactory, Searchable;
 
     /**
      * quantity is not fillable: stock only changes through StockService, which

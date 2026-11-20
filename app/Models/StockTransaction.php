@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StockTransactionType;
+use App\Models\Concerns\FlushesInventoryStatistics;
 use App\Models\Concerns\IsAppendOnly;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class StockTransaction extends Model
 {
-    use IsAppendOnly;
+    use FlushesInventoryStatistics, IsAppendOnly;
 
     protected $fillable = [
         'product_id',

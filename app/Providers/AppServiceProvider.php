@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\InventoryStatistics;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -37,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->defineGates();
+
+        // The sidebar badge reads the cached dashboard figures, so it costs no extra queries.
+        View::composer('partials.sidebar-nav', function ($view) {
+            $view->with('stockAlertCount', app(InventoryStatistics::class)->alertCount());
+        });
     }
 
     /**
