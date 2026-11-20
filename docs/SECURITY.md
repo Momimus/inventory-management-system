@@ -41,6 +41,42 @@ User management rules (`UserPolicy`):
 Tests: `UserManagementTest`, including `test_staff_cannot_access_any_user_management_route`. That test
 sends staff requests straight to admin URLs with other users' IDs (IDOR attempts) and expects 403.
 
+## Input validation, SQL injection and XSS
+
+- **Form Requests validate every write.** `app/Http/Requests/*Request.php` holds the rules: strict decimal
+  prices (`decimal:0,2`, no negatives), integer quantities, SKU format and uniqueness, email format, and
+  unique names.
+- **List filters are validated too.** Index pages validate their GET parameters. Sorting only accepts
+  column names from a whitelist (`ProductController::SORTABLE`), so a URL can never choose a column.
+- **Queries are parameterised.** All queries use Eloquent or the query builder with bound parameters.
+  Search goes through the `Searchable` trait, which passes the term as a binding. There is no raw SQL
+  built from user input.
+  Tests: `test_sorting_only_accepts_whitelisted_columns`, `test_search_input_is_treated_as_data_not_sql`.
+- **Output is escaped.** Blade's `{{ }}` escapes all output. The only raw outputs are
+  `{!! nl2br(e($text)) !!}` for supplier addresses and product descriptions. `e()` escapes first, so only
+  the `<br>` tags added afterwards are real HTML.
+  Tests: `test_category_names_are_escaped_in_html`, `test_supplier_address_is_escaped_while_keeping_line_breaks`,
+  `test_product_text_is_escaped`.
+- **Quantity can't be mass-assigned.** `quantity` is not in `Product::$fillable`, so a forged form field cannot
+  change stock. Test: `test_quantity_cannot_be_set_through_the_product_form`.
+
+## File uploads (product images)
+
+Code: `ProductRequest::rules()` and `app/Services/ProductImageStorage.php`. Tests: `ProductImageUploadTest`.
+
+1. **File type.** Only `jpg`, `jpeg`, `png` and `webp` extensions are allowed, *and* the detected MIME
+   type must be `image/jpeg`, `image/png` or `image/webp`. SVG, which can contain scripts, is not
+   accepted.
+2. **Size and dimensions.** The limit is 2 MB, with dimensions between 50 and 4000 px. Dimensions are read
+   from the header before the image is decoded, which stops "decompression bomb" files.
+3. **Re-encoding.** GD decodes the image and writes a new WebP file, at most 800 px on each side. Embedded
+   scripts, EXIF data and polyglot payloads do not survive. A PHP file renamed to `.jpg` fails validation.
+4. **File name.** The stored name is 40 random characters plus `.webp`. Nothing from the original file name
+   is used.
+5. **Storage.** Files go to `storage/app/public/products`, served through the `public/storage` link. They
+   are always `.webp`, so the web server never executes them.
+6. **Clean-up.** Replaced or removed images are deleted from disk.
+
 ## HTTP and browser protections
 
 | Protection | How | Code | Test |

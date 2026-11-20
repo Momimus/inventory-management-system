@@ -70,7 +70,7 @@
                             <tbody>
                                 @foreach ($products as $product)
                                     <tr>
-                                        <td class="fw-medium">{{ $product->name }}</td>
+                                        <td class="fw-medium"><a href="{{ route('products.show', $product) }}">{{ $product->name }}</a></td>
                                         <td><code>{{ $product->sku }}</code></td>
                                         <td>{{ $product->category->name }}</td>
                                         <td class="text-end">{{ number_format($product->quantity) }}</td>
