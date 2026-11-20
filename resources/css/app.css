@@ -1,5 +1,216 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.min.css';
 
-body {
+:root {
+    --app-sidebar-width: 15.5rem;
+    --app-sidebar-bg: #17202e;
+    --app-sidebar-color: #b8c2d1;
+    --app-sidebar-active-bg: #243146;
+    --app-surface: #f4f6f9;
+    --bs-body-font-size: 0.9375rem;
+    --bs-border-radius: 0.5rem;
+    --bs-primary: #1f5fbf;
+    --bs-primary-rgb: 31, 95, 191;
+    --bs-link-color: #1f5fbf;
+    --bs-link-color-rgb: 31, 95, 191;
+}
+
+.btn-primary {
+    --bs-btn-bg: #1f5fbf;
+    --bs-btn-border-color: #1f5fbf;
+    --bs-btn-hover-bg: #1a50a2;
+    --bs-btn-hover-border-color: #1a50a2;
+    --bs-btn-active-bg: #164488;
+    --bs-btn-active-border-color: #164488;
+    --bs-btn-disabled-bg: #1f5fbf;
+    --bs-btn-disabled-border-color: #1f5fbf;
+}
+
+.app-body {
     min-height: 100vh;
+    background-color: var(--app-surface);
+}
+
+/* Layout */
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-sidebar {
+    --bs-offcanvas-width: var(--app-sidebar-width);
+    --bs-offcanvas-bg: var(--app-sidebar-bg);
+    color: var(--app-sidebar-color);
+    background-color: var(--app-sidebar-bg);
+}
+
+@media (min-width: 992px) {
+    .app-sidebar {
+        position: sticky;
+        top: 0;
+        flex: 0 0 var(--app-sidebar-width);
+        height: 100vh;
+        overflow-y: auto;
+    }
+}
+
+.app-sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    width: 100%;
+    padding: 0.75rem;
+}
+
+.app-sidebar-heading {
+    padding: 1rem 0.75rem 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7b879a;
+}
+
+.app-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--app-sidebar-color);
+    text-decoration: none;
+    border-radius: 0.375rem;
+}
+
+.app-sidebar-link:hover,
+.app-sidebar-link:focus-visible {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.app-sidebar-link.active {
+    color: #fff;
+    background-color: var(--app-sidebar-active-bg);
+    box-shadow: inset 3px 0 0 #5b9bff;
+}
+
+.app-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    background-color: #fff;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.app-content {
+    padding: 1.5rem;
+}
+
+@media (max-width: 575.98px) {
+    .app-content,
+    .app-topbar {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Guest pages */
+
+.guest-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.guest-card {
+    width: 100%;
+    max-width: 26rem;
+    border: 0;
+}
+
+/* Components */
+
+.card {
+    border-color: #e3e7ee;
+}
+
+.card-header {
+    font-weight: 600;
+    background-color: #fff;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.65rem 0.75rem;
+}
+
+.table thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+    white-space: nowrap;
+}
+
+.stat-card .stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.15rem;
+    border-radius: 0.5rem;
+}
+
+.stat-card .stat-value {
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.empty-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+.empty-state .bi {
+    font-size: 2rem;
+}
+
+.product-thumb {
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    background-color: var(--bs-tertiary-bg);
+}
+
+.product-image {
+    width: 100%;
+    max-width: 16rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    background-color: var(--bs-tertiary-bg);
 }

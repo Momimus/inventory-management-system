@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +21,8 @@ class DashboardTest extends TestCase
 
         $category->products()->create(['name' => 'Notebook', 'sku' => 'NB-01', 'reorder_level' => 5]);
 
-        $this->get('/')
+        $this->actingAs(User::factory()->create())
+            ->get('/')
             ->assertOk()
             ->assertViewHas('productCount', 2)
             ->assertViewHas('categoryCount', 1)

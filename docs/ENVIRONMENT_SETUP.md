@@ -39,11 +39,13 @@ npm -v
 Open `C:\xampp\php\php.ini` and remove the leading `;` from these lines:
 
 ```ini
+extension=gd
 extension=intl
 extension=zip
 ```
 
-`zip` lets Composer unpack packages quickly. `intl` is used by Laravel's number and currency helpers.
+`gd` resizes and re-encodes uploaded product images. `zip` lets Composer unpack packages quickly.
+`intl` is used by Laravel's number and currency helpers.
 Run `php -m` to confirm they are loaded.
 
 ## 3. Start MySQL
@@ -66,8 +68,11 @@ npm install
 cp .env.example .env      # skip if .env already exists
 php artisan key:generate
 php artisan migrate
+php artisan users:create-admin   # your first login
 npm run build
 ```
+
+There is no public registration page. Further accounts are created by an administrator.
 
 ## 5. Database settings in `.env`
 
