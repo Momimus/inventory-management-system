@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -59,6 +60,8 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
         Route::get('low-stock', [ReportController::class, 'lowStock'])->name('low-stock');
         Route::get('product-history', [ReportController::class, 'productHistory'])->name('product-history');
     });
+
+    Route::get('activity', [ActivityLogController::class, 'index'])->middleware('can:view-activity-log')->name('activity.index');
 
     Route::resource('users', UserController::class)->except(['show', 'destroy']);
     Route::patch('users/{user}/status', [UserController::class, 'toggleStatus'])->name('users.status');

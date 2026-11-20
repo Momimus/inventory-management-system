@@ -38,5 +38,8 @@
     @can('viewAny', \App\Models\User::class)
         <div class="app-sidebar-heading">Administration</div>
         <x-sidebar-link route="users.index" active="users.*" icon="people">Users</x-sidebar-link>
+        @can('view-activity-log')
+            <x-sidebar-link route="activity.index" icon="activity">Activity log</x-sidebar-link>
+        @endcan
     @endcan
 </nav>

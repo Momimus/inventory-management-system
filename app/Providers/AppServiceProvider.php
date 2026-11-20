@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\StockTransaction;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Services\InventoryStatistics;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -26,6 +31,16 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
 
         Paginator::useBootstrapFive();
+
+        // Polymorphic columns (activity_logs.subject_type) store these short names
+        // instead of PHP class names, so renaming a class never breaks stored data.
+        Relation::enforceMorphMap([
+            'user' => User::class,
+            'category' => Category::class,
+            'product' => Product::class,
+            'supplier' => Supplier::class,
+            'stock_transaction' => StockTransaction::class,
+        ]);
 
         Password::defaults(function () {
             $rule = Password::min(10)->letters()->mixedCase()->numbers();
