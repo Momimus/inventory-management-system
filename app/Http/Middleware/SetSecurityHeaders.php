@@ -14,7 +14,7 @@ class SetSecurityHeaders
      * allowed for small layout values (e.g. bar widths); inline scripts are not.
      */
     private const CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-        ."img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; "
+        ."img-src 'self' data:%s; font-src 'self'; connect-src 'self'; object-src 'none'; "
         ."base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
     public function handle(Request $request, Closure $next): Response
@@ -30,7 +30,7 @@ class SetSecurityHeaders
 
         // The Vite dev server serves assets from another port, which this policy would block.
         if (! Vite::isRunningHot()) {
-            $headers->set('Content-Security-Policy', self::CONTENT_SECURITY_POLICY);
+            $headers->set('Content-Security-Policy', sprintf(self::CONTENT_SECURITY_POLICY, $this->imageOrigin()));
         }
 
         if ($request->isSecure() && app()->isProduction()) {
@@ -38,5 +38,24 @@ class SetSecurityHeaders
         }
 
         return $response;
+    }
+
+    /**
+     * Product images on an external disk (for example an S3 bucket) are served
+     * from another origin, which the image policy must allow. Only the
+     * scheme and host of the configured disk URL are added, never a path.
+     */
+    private function imageOrigin(): string
+    {
+        $url = config('filesystems.disks.'.config('inventory.product_images.disk').'.url');
+        $parts = is_string($url) ? parse_url($url) : false;
+
+        if (! $parts || ! in_array($parts['scheme'] ?? null, ['https', 'http'], true) || empty($parts['host'])) {
+            return '';
+        }
+
+        $origin = $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
+
+        return $origin === request()->getSchemeAndHttpHost() ? '' : ' '.$origin;
     }
 }

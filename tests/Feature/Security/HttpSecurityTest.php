@@ -5,7 +5,10 @@ namespace Tests\Feature\Security;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Vite;
 use Tests\TestCase;
 
@@ -25,6 +28,44 @@ class HttpSecurityTest extends TestCase
         $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
         $this->assertStringContainsString("frame-ancestors 'none'", $response->headers->get('Content-Security-Policy'));
         $this->assertStringContainsString("script-src 'self'", $response->headers->get('Content-Security-Policy'));
+    }
+
+    public function test_image_policy_allows_only_the_external_image_disk_origin(): void
+    {
+        Vite::useHotFile(storage_path('framework/testing/no-vite-hot-file'));
+
+        $policy = fn () => $this->get('/login')->headers->get('Content-Security-Policy');
+
+        $this->assertStringContainsString("img-src 'self' data:;", $policy(), 'Local images need no extra origin.');
+
+        config([
+            'inventory.product_images.disk' => 's3',
+            'filesystems.disks.s3.url' => 'https://images.example.com/inventory-bucket',
+        ]);
+
+        $this->assertStringContainsString("img-src 'self' data: https://images.example.com;", $policy());
+    }
+
+    public function test_forwarded_client_details_are_ignored_unless_proxies_are_trusted(): void
+    {
+        Route::get('/__client', fn (Request $request) => [$request->ip(), $request->isSecure()]);
+        $forwarded = ['X-Forwarded-For' => '203.0.113.9', 'X-Forwarded-Proto' => 'https'];
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.5'])->getJson('/__client', $forwarded)
+            ->assertExactJson(['10.0.0.5', false]);
+
+        $_ENV['APP_TRUSTED_PROXIES'] = '*';
+
+        try {
+            $this->refreshApplication();
+            Route::get('/__client', fn (Request $request) => [$request->ip(), $request->isSecure()]);
+
+            $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.5'])->getJson('/__client', $forwarded)
+                ->assertExactJson(['203.0.113.9', true]);
+        } finally {
+            unset($_ENV['APP_TRUSTED_PROXIES']);
+            TrustProxies::flushState();
+        }
     }
 
     public function test_session_cookie_is_http_only(): void

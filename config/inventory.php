@@ -6,7 +6,9 @@ return [
     'currency' => env('INVENTORY_CURRENCY', 'USD'),
 
     'product_images' => [
-        'disk' => 'public',
+        // "public" stores files on this server. Hosts without a persistent disk
+        // (such as Vercel containers) must use "s3" or another shared disk.
+        'disk' => env('PRODUCT_IMAGE_DISK', 'public'),
         'directory' => 'products',
         'max_upload_kb' => 2048,
         'max_input_dimension' => 4000,

@@ -62,6 +62,17 @@ return [
     'trusted_hosts' => array_values(array_filter(array_map('trim', explode(',', (string) env('APP_TRUSTED_HOSTS', ''))))),
 
     /*
+    | Proxies whose X-Forwarded-* headers are believed, as a comma-separated
+    | list of IP addresses or CIDR ranges, or "*" to trust whichever proxy
+    | connected. Leave empty when visitors reach the app directly. Behind a
+    | platform proxy such as Vercel's, this is required: otherwise every
+    | visitor appears to share the proxy's IP address (and its login rate
+    | limit) and HTTPS requests are treated as plain HTTP.
+    */
+
+    'trusted_proxies' => env('APP_TRUSTED_PROXIES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\InventoryStatistics;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Set here rather than in bootstrap/app.php because configuration is not loaded yet there.
+        if ($proxies = config('app.trusted_proxies')) {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
+
         // Outside production, loading a relationship that was not eager loaded
         // throws an exception, so N+1 query problems show up during development and tests.
         Model::preventLazyLoading(! $this->app->isProduction());

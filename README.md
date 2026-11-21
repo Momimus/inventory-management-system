@@ -60,6 +60,7 @@ npm run build               # front-end assets
 | [SECURITY](docs/SECURITY.md) | Each protection, where it is implemented and which test proves it |
 | [TESTING](docs/TESTING.md) | What is tested and how to run the tests |
 | [DEPLOYMENT](docs/DEPLOYMENT.md) | Production setup, hardening, backups and updates |
+| [VERCEL_DEPLOYMENT](docs/VERCEL_DEPLOYMENT.md) | Docker image and deployment on Vercel's Container runtime |
 | [LEARNING_GUIDE](docs/LEARNING_GUIDE.md) | The Laravel concepts used, explained with this project's code |
 
 ## License

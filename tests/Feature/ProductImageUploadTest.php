@@ -55,6 +55,22 @@ class ProductImageUploadTest extends TestCase
         $this->assertSame(600, $height);
     }
 
+    public function test_images_are_stored_on_the_configured_disk(): void
+    {
+        // Hosts without a persistent local disk (such as Vercel) set PRODUCT_IMAGE_DISK=s3.
+        config(['inventory.product_images.disk' => 's3']);
+        Storage::fake('s3');
+
+        $this->actingAs($this->user)->post('/products', $this->payload([
+            'image' => UploadedFile::fake()->image('lamp.png', 400, 300),
+        ]))->assertSessionHasNoErrors();
+
+        $product = Product::sole();
+        Storage::disk('s3')->assertExists($product->image_path);
+        Storage::disk('public')->assertMissing($product->image_path);
+        $this->assertSame(Storage::disk('s3')->url($product->image_path), $product->imageUrl());
+    }
+
     public function test_php_file_is_rejected(): void
     {
         $this->actingAs($this->user)->post('/products', $this->payload([

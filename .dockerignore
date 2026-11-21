@@ -1,0 +1,43 @@
+# Secrets and local environment files must never enter the image.
+.env
+.env.*
+!.env.example
+auth.json
+
+# Rebuilt inside the image
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+
+# Runtime data: the container writes to /tmp instead
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*.php
+/database/*.sqlite*
+
+# Not needed at runtime
+/.git
+/.github
+/.agents
+/.claude
+/.codex
+/.impeccable
+/.phpunit.cache
+/.phpunit.result.cache
+/.idea
+/.vscode
+/.phpunit.cache
+/docs
+/tests
+/phpunit.xml
+/skills-lock.json
+/Dockerfile
+/.dockerignore
+/vercel.json
+*.log
